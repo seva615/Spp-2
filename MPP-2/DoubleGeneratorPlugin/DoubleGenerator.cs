@@ -3,7 +3,7 @@ using System;
 
 namespace DoubleGeneratorPlugin
 {
-    public class DoubleGenerator : IGenerator//т.к у него есть интерфейс, Faker находит его
+    public class DoubleGenerator : IGenerator
     {
         private readonly Random _random = new();
 
