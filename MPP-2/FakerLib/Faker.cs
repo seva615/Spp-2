@@ -16,15 +16,15 @@ namespace FakerLib.Fakers.Impl
 
         public Faker()
         {
-            var generatorType = typeof(IGenerator);
-            _generators = AppDomain.CurrentDomain.GetAssemblies()//получаем все сборки (dll)
+            var generatorType = typeof(IGenerator)
+            _generators = AppDomain.CurrentDomain.GetAssemblies()
                        .SelectMany(a => a.GetTypes())
-                       .Where(t => t.IsClass && t.GetInterfaces().Contains(generatorType)) //если в I есть генератор
+                       .Where(t => t.IsClass && t.GetInterfaces().Contains(generatorType)) 
                        .Select(t =>
                        {
                            try
                            {
-                               return (IGenerator)Activator.CreateInstance(t); //пробуем создать генератор
+                               return (IGenerator)Activator.CreateInstance(t); 
                            }
                            catch
                            {
@@ -40,9 +40,9 @@ namespace FakerLib.Fakers.Impl
             {
                 try
                 {
-                    if (Equals(field.GetValue(obj), GetDefaultValue(field.FieldType))) //проверка на пустое поле
+                    if (Equals(field.GetValue(obj), GetDefaultValue(field.FieldType))) 
                     {
-                        field.SetValue(obj, Create(field.FieldType));//рекурсивно создаём объект и присваиваем полю
+                        field.SetValue(obj, Create(field.FieldType));
                     }
                 }
                 catch
@@ -52,27 +52,25 @@ namespace FakerLib.Fakers.Impl
         }
         public object Create(Type t)
         {
-            if (CyclicDependency.IsCyclic(t))//проверка на циклическую зависимость
+            if (CyclicDependency.IsCyclic(t))
             {
                 throw new Exception($"{t} contains cyclical dependency");
             }
 
-            foreach (var generator in _generators)//проходим по всем готовым генераторам
+            foreach (var generator in _generators)
             {
-                if (generator.CanGenerate(t))//если может сделать объект по типу, то он его делает
+                if (generator.CanGenerate(t))
                     return generator.Generate(t);
             }
 
-            //если нет, то делаем объект сами
             foreach (var constructor in t.GetConstructors())
             {
                 try
                 {
                     var args = constructor.GetParameters()
                         .Select(p => p.ParameterType)
-                        .Select(Create);//для каждого параметра конструктора рекурсивно создаём объект
-
-                    object obj = constructor.Invoke(args.ToArray());//создаём объект с помощью конструктора
+                        .Select(Create);
+                    object obj = constructor.Invoke(args.ToArray());
                     InitializeFields(obj);
                     return obj;
                 }
@@ -82,9 +80,8 @@ namespace FakerLib.Fakers.Impl
             }
             throw new Exception($"Cannot create object of type: {t}");
         }
-        public T Create<T>() => (T)Create(typeof(T)); //получаем тип и создаём объект, проводим его к T
-
-        private static object GetDefaultValue(Type t) //получаем 0 либо null
+        public T Create<T>() => (T)Create(typeof(T)); 
+        private static object GetDefaultValue(Type t) 
         {
             return t.IsValueType ? Activator.CreateInstance(t) : null;
         }
