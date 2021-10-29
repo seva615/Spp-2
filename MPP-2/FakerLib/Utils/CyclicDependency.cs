@@ -15,26 +15,26 @@ namespace FakerLib.Utils
         {
             return IsCyclic(type, null);
         }
-        private static bool IsCyclic(Type type, Node parent) //строим дерево типов 
+        private static bool IsCyclic(Type type, Node parent) 
         {
-            for (Node node = parent; node != null; node = node.Parent) //связный список
+            for (Node node = parent; node != null; node = node.Parent)
             {
-                if (Equals(node.Type, type))//если на пути от листа к корню, есть такой тип, то у нас циклическая зависимость
+                if (Equals(node.Type, type))
                 {
                     return true;
                 }
             }
-            var currentNode = new Node()//создание листа
+            var currentNode = new Node()
             {
                 Parent = parent,
                 Type = type
             };
             var result =  type.GetConstructors()
                 .SelectMany(constructor => constructor.GetParameters()) 
-                //получаем типы всех параметров конструкторов
+             
                 .Select(p => p.ParameterType)
-                .Any(t => IsCyclic(t, currentNode));//рекурсивно вызываем проверку для каждого из типов, если один true => return true
-            //Node нам больше не нужен удалим ссылки чтоб сборщик мусора его удалил
+                .Any(t => IsCyclic(t, currentNode));
+            
             currentNode.Parent = null;
             currentNode.Type = null;
             return result;
