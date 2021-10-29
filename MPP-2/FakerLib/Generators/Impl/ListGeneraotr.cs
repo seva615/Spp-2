@@ -23,7 +23,7 @@ namespace FakerLib.Generator.Impl
 
             for (int i = 0; i < amount; i++)
             {
-                list.Add(Faker.DefaultFaker.Create(t.GetGenericArguments()[0]));//рекурсивно заполняем элементы списка
+                list.Add(Faker.DefaultFaker.Create(t.GetGenericArguments()[0]));
             }
 
             return list;
